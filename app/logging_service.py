@@ -1,13 +1,16 @@
 import os
 import datetime
+from pathlib import Path
+
 import pandas as pd
 
 
-LOG_PATH = "logs/prediction_logs.csv"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+LOG_PATH = PROJECT_ROOT / "logs" / "prediction_logs.csv"
 
 
 def log_prediction(applicant_id: str, input_data: dict, probability: float, credit_score: int, risk_category: str, decision: str):
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs(LOG_PATH.parent, exist_ok=True)
 
     log_row = {
         "timestamp": datetime.datetime.now(),

@@ -1,10 +1,13 @@
+from pathlib import Path
+
 import joblib
 import pandas as pd
 
 
-MODEL_PATH = "models/xgb_feature_engineered_loan_default_model.pkl"
-COLUMNS_PATH = "models/model_columns.pkl"
-THRESHOLD_PATH = "models/best_threshold.pkl"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODEL_PATH = PROJECT_ROOT / "models" / "xgb_feature_engineered_loan_default_model.pkl"
+COLUMNS_PATH = PROJECT_ROOT / "models" / "model_columns.pkl"
+THRESHOLD_PATH = PROJECT_ROOT / "models" / "best_threshold.pkl"
 
 
 model = joblib.load(MODEL_PATH)

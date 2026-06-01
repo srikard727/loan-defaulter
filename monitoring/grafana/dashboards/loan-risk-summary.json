@@ -1,0 +1,83 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "loan_predictions_24h",
+          "legendFormat": "Requests 24h"
+        }
+      ],
+      "title": "Requests 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "loan_scoring_latency_p95_ms",
+          "legendFormat": "P95 Latency"
+        }
+      ],
+      "title": "Scoring Latency P95",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "loan_prediction_drift_psi",
+          "legendFormat": "Prediction Drift PSI"
+        }
+      ],
+      "title": "Prediction Drift",
+      "type": "stat"
+    }
+  ],
+  "schemaVersion": 40,
+  "tags": ["loan-risk", "mlops"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Loan Risk Summary",
+  "uid": "loan-risk-summary",
+  "version": 1
+}
