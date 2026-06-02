@@ -23,36 +23,42 @@ export function PortfolioRiskChart({ data }: PortfolioRiskChartProps) {
         <Info size={17} />
       </div>
 
-      <div className="portfolio-layout">
-        <div className="donut-wrap">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" innerRadius={58} outerRadius={98} paddingAngle={1}>
-                {data.map((entry) => (
-                  <Cell key={entry.name} fill={COLORS[entry.name] ?? "#64748b"} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `${value}%`} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="legend-list">
-          {data.map((entry) => (
-            <div className="legend-item" key={entry.name}>
-              <span style={{ background: COLORS[entry.name] }} />
-              <p>
-                <strong>{entry.name}</strong>
-                <small>{entry.probability_range}</small>
-              </p>
+      {data.length ? (
+        <>
+          <div className="portfolio-layout">
+            <div className="donut-wrap">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={data} dataKey="value" nameKey="name" innerRadius={58} outerRadius={98} paddingAngle={1}>
+                    {data.map((entry) => (
+                      <Cell key={entry.name} fill={COLORS[entry.name] ?? "#64748b"} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => `${value}%`} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="legend-list">
+              {data.map((entry) => (
+                <div className="legend-item" key={entry.name}>
+                  <span style={{ background: COLORS[entry.name] }} />
+                  <p>
+                    <strong>{entry.name}</strong>
+                    <small>{entry.probability_range}</small>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      <div className="panel-foot">
-        <span>As of May 20, 2024</span>
-        <span>Total Applications: 12,458</span>
-      </div>
+          <div className="panel-foot">
+            <span>Account portfolio</span>
+            <span>Scored loaners only</span>
+          </div>
+        </>
+      ) : (
+        <div className="chart-empty">No scored loaners yet</div>
+      )}
     </section>
   );
 }

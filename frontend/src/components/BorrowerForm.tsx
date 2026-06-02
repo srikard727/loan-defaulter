@@ -4,8 +4,11 @@ import type { ApplicantPayload } from "../types";
 
 type BorrowerFormProps = {
   applicant: ApplicantPayload;
+  loaners?: ApplicantPayload[];
   loading?: boolean;
+  selectedLoaner?: string;
   onChange: (payload: ApplicantPayload) => void;
+  onLoanerSelect?: (loanerName: string) => void;
   onSubmit: () => void;
 };
 
@@ -15,9 +18,19 @@ const maritalOptions = ["Single", "Married", "Divorced"] as const;
 const yesNoOptions = ["No", "Yes"] as const;
 const purposeOptions = ["Auto", "Business", "Education", "Home", "Other"] as const;
 
-export function BorrowerForm({ applicant, loading, onChange, onSubmit }: BorrowerFormProps) {
+export function BorrowerForm({
+  applicant,
+  loaners,
+  loading,
+  selectedLoaner,
+  onChange,
+  onLoanerSelect,
+  onSubmit
+}: BorrowerFormProps) {
   const [emptyFields, setEmptyFields] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
+  const hasLoaner = Boolean(applicant.applicant_id.trim());
+  const fieldsDisabled = !hasLoaner;
 
   const update = <K extends keyof ApplicantPayload>(key: K, value: ApplicantPayload[K]) => {
     onChange({ ...applicant, [key]: value });
@@ -48,7 +61,7 @@ export function BorrowerForm({ applicant, loading, onChange, onSubmit }: Borrowe
   const handleSubmit = () => {
     const missing = Object.values(emptyFields);
     if (!applicant.applicant_id.trim()) {
-      missing.unshift("Applicant ID");
+      missing.unshift("Loaner Name");
     }
 
     if (missing.length) {
@@ -70,33 +83,48 @@ export function BorrowerForm({ applicant, loading, onChange, onSubmit }: Borrowe
       </div>
 
       <div className="form-grid">
-        <Field label="Applicant ID">
-          <input value={applicant.applicant_id} onChange={(event) => update("applicant_id", event.target.value)} />
+        {loaners && onLoanerSelect && (
+          <Field label="Current Loaner">
+            <select
+              disabled={!loaners.length}
+              value={selectedLoaner ?? applicant.applicant_id}
+              onChange={(event) => onLoanerSelect(event.target.value)}
+            >
+              {!loaners.length && <option value="">No loaners yet</option>}
+              {loaners.map((loaner) => (
+                <option key={loaner.applicant_id} value={loaner.applicant_id}>
+                  {loaner.applicant_id}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
+        <Field label="Loaner Name">
+          <input value={applicant.applicant_id} readOnly disabled={fieldsDisabled} />
         </Field>
-        <NumberField field="Age" label="Age" value={applicant.Age} onChange={(value) => update("Age", value)} onEmptyChange={setFieldEmpty} />
-        <NumberField field="Income" label="Income (Annual)" value={applicant.Income} onChange={(value) => update("Income", value)} onEmptyChange={setFieldEmpty} prefix="$" />
-        <NumberField field="LoanAmount" label="Loan Amount" value={applicant.LoanAmount} onChange={(value) => update("LoanAmount", value)} onEmptyChange={setFieldEmpty} prefix="$" />
-        <NumberField field="CreditScore" label="Credit Score" value={applicant.CreditScore} onChange={(value) => update("CreditScore", value)} onEmptyChange={setFieldEmpty} />
-        <NumberField field="MonthsEmployed" label="Months Employed" value={applicant.MonthsEmployed} onChange={(value) => update("MonthsEmployed", value)} onEmptyChange={setFieldEmpty} />
-        <NumberField field="NumCreditLines" label="Credit Lines" value={applicant.NumCreditLines} onChange={(value) => update("NumCreditLines", value)} onEmptyChange={setFieldEmpty} />
-        <NumberField field="InterestRate" label="Interest Rate (%)" value={applicant.InterestRate} onChange={(value) => update("InterestRate", value)} onEmptyChange={setFieldEmpty} step={0.1} />
-        <NumberField field="LoanTerm" label="Loan Term" value={applicant.LoanTerm} onChange={(value) => update("LoanTerm", value)} onEmptyChange={setFieldEmpty} />
-        <NumberField field="DTIRatio" label="DTI Ratio" value={applicant.DTIRatio} onChange={(value) => update("DTIRatio", value)} onEmptyChange={setFieldEmpty} step={0.01} />
-        <SelectField label="Employment Type" value={applicant.EmploymentType} options={employmentOptions} onChange={(value) => update("EmploymentType", value)} />
-        <SelectField label="Education" value={applicant.Education} options={educationOptions} onChange={(value) => update("Education", value)} />
-        <SelectField label="Marital Status" value={applicant.MaritalStatus} options={maritalOptions} onChange={(value) => update("MaritalStatus", value)} />
-        <SelectField label="Loan Purpose" value={applicant.LoanPurpose} options={purposeOptions} onChange={(value) => update("LoanPurpose", value)} />
-        <SelectField label="Has Mortgage" value={applicant.HasMortgage} options={yesNoOptions} onChange={(value) => update("HasMortgage", value)} />
-        <SelectField label="Has Dependents" value={applicant.HasDependents} options={yesNoOptions} onChange={(value) => update("HasDependents", value)} />
-        <SelectField label="Has Co-Signer" value={applicant.HasCoSigner} options={yesNoOptions} onChange={(value) => update("HasCoSigner", value)} />
+        <NumberField field="Age" label="Age" value={applicant.Age} disabled={fieldsDisabled} onChange={(value) => update("Age", value)} onEmptyChange={setFieldEmpty} />
+        <NumberField field="Income" label="Income (Annual)" value={applicant.Income} disabled={fieldsDisabled} onChange={(value) => update("Income", value)} onEmptyChange={setFieldEmpty} prefix="$" />
+        <NumberField field="LoanAmount" label="Loan Amount" value={applicant.LoanAmount} disabled={fieldsDisabled} onChange={(value) => update("LoanAmount", value)} onEmptyChange={setFieldEmpty} prefix="$" />
+        <NumberField field="CreditScore" label="Credit Score" value={applicant.CreditScore} disabled={fieldsDisabled} onChange={(value) => update("CreditScore", value)} onEmptyChange={setFieldEmpty} />
+        <NumberField field="MonthsEmployed" label="Months Employed" value={applicant.MonthsEmployed} disabled={fieldsDisabled} onChange={(value) => update("MonthsEmployed", value)} onEmptyChange={setFieldEmpty} />
+        <NumberField field="NumCreditLines" label="Credit Lines" value={applicant.NumCreditLines} disabled={fieldsDisabled} onChange={(value) => update("NumCreditLines", value)} onEmptyChange={setFieldEmpty} />
+        <NumberField field="InterestRate" label="Interest Rate (%)" value={applicant.InterestRate} disabled={fieldsDisabled} onChange={(value) => update("InterestRate", value)} onEmptyChange={setFieldEmpty} step={0.1} />
+        <NumberField field="LoanTerm" label="Loan Term" value={applicant.LoanTerm} disabled={fieldsDisabled} onChange={(value) => update("LoanTerm", value)} onEmptyChange={setFieldEmpty} />
+        <NumberField field="DTIRatio" label="DTI Ratio" value={applicant.DTIRatio} disabled={fieldsDisabled} onChange={(value) => update("DTIRatio", value)} onEmptyChange={setFieldEmpty} step={0.01} />
+        <SelectField label="Employment Type" value={applicant.EmploymentType} disabled={fieldsDisabled} options={employmentOptions} onChange={(value) => update("EmploymentType", value)} />
+        <SelectField label="Education" value={applicant.Education} disabled={fieldsDisabled} options={educationOptions} onChange={(value) => update("Education", value)} />
+        <SelectField label="Marital Status" value={applicant.MaritalStatus} disabled={fieldsDisabled} options={maritalOptions} onChange={(value) => update("MaritalStatus", value)} />
+        <SelectField label="Loan Purpose" value={applicant.LoanPurpose} disabled={fieldsDisabled} options={purposeOptions} onChange={(value) => update("LoanPurpose", value)} />
+        <SelectField label="Has Mortgage" value={applicant.HasMortgage} disabled={fieldsDisabled} options={yesNoOptions} onChange={(value) => update("HasMortgage", value)} />
+        <SelectField label="Has Dependents" value={applicant.HasDependents} disabled={fieldsDisabled} options={yesNoOptions} onChange={(value) => update("HasDependents", value)} />
+        <SelectField label="Has Co-Signer" value={applicant.HasCoSigner} disabled={fieldsDisabled} options={yesNoOptions} onChange={(value) => update("HasCoSigner", value)} />
       </div>
 
-      <button className="primary-button" type="button" onClick={handleSubmit} disabled={loading}>
+      <button className="primary-button" type="button" onClick={handleSubmit} disabled={loading || !hasLoaner}>
         <BadgeCheck size={18} />
-        <span>{loading ? "Scoring..." : "Score Applicant"}</span>
+        <span>{loading ? "Scoring..." : "Score Loaner"}</span>
       </button>
       {formError && <p className="form-error">{formError}</p>}
-      <p className="form-note">All fields are required for scoring</p>
     </section>
   );
 }
@@ -114,6 +142,7 @@ function NumberField({
   field,
   label,
   value,
+  disabled,
   prefix,
   step = 1,
   onChange,
@@ -122,20 +151,27 @@ function NumberField({
   field: string;
   label: string;
   value: number;
+  disabled?: boolean;
   prefix?: string;
   step?: number;
   onChange: (value: number) => void;
   onEmptyChange: (field: string, label: string, isEmpty: boolean) => void;
 }) {
-  const [draftValue, setDraftValue] = useState(String(value));
+  const [draftValue, setDraftValue] = useState(disabled ? "" : String(value));
   const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    if (!focused && draftValue.trim() !== "") {
+    if (disabled) {
+      setDraftValue("");
+      onEmptyChange(field, label, false);
+      return;
+    }
+
+    if (!focused) {
       setDraftValue(String(value));
       onEmptyChange(field, label, false);
     }
-  }, [draftValue, field, focused, label, onEmptyChange, value]);
+  }, [disabled, field, focused, label, onEmptyChange, value]);
 
   const handleChange = (nextValue: string) => {
     setDraftValue(nextValue);
@@ -157,6 +193,7 @@ function NumberField({
       <span className="input-shell">
         {prefix && <b>{prefix}</b>}
         <input
+          disabled={disabled}
           type="number"
           step={step}
           value={draftValue}
@@ -172,14 +209,24 @@ function NumberField({
 function SelectField<T extends string>({
   label,
   value,
+  disabled,
   options,
   onChange
 }: {
   label: string;
   value: T;
+  disabled?: boolean;
   options: readonly T[];
   onChange: (value: T) => void;
 }) {
+  if (disabled) {
+    return (
+      <Field label={label}>
+        <input disabled value="" />
+      </Field>
+    );
+  }
+
   return (
     <Field label={label}>
       <select value={value} onChange={(event) => onChange(event.target.value as T)}>

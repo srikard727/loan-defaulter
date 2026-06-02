@@ -14,49 +14,74 @@ import type { ApplicantPayload, MonitoringSummary, PlatformFeatures, PortfolioBu
 
 type DashboardProps = {
   applicant: ApplicantPayload;
+  loaners: ApplicantPayload[];
   score: ScoreResponse;
   monitoring: MonitoringSummary;
   portfolio: PortfolioBucket[];
   platformFeatures: PlatformFeatures;
   loading: boolean;
+  selectedLoaner: string;
   onApplicantChange: (payload: ApplicantPayload) => void;
+  onLoanerSelect: (loanerName: string) => void;
   onScore: () => void;
 };
 
-export function Dashboard({ applicant, score, monitoring, portfolio, platformFeatures, loading, onApplicantChange, onScore }: DashboardProps) {
+export function Dashboard({
+  applicant,
+  loaners,
+  score,
+  monitoring,
+  portfolio,
+  platformFeatures,
+  loading,
+  selectedLoaner,
+  onApplicantChange,
+  onLoanerSelect,
+  onScore
+}: DashboardProps) {
+  const hasScore = Boolean(score.created_at);
+
   return (
     <div className="dashboard-grid">
       <div className="borrower-column">
-        <BorrowerForm applicant={applicant} loading={loading} onChange={onApplicantChange} onSubmit={onScore} />
+        <BorrowerForm
+          applicant={applicant}
+          loaners={loaners}
+          loading={loading}
+          selectedLoaner={selectedLoaner}
+          onChange={onApplicantChange}
+          onLoanerSelect={onLoanerSelect}
+          onSubmit={onScore}
+        />
       </div>
 
       <div className="metrics-row">
         <MetricCard
           icon={<TrendingUp size={32} />}
           label="Default Probability"
-          value={`${(score.default_probability * 100).toFixed(1)}%`}
-          detail={`Model Confidence: ${(score.model_confidence * 100).toFixed(0)}%`}
+          value={hasScore ? `${(score.default_probability * 100).toFixed(1)}%` : "-"}
+          detail={hasScore ? `Model Confidence: ${(score.model_confidence * 100).toFixed(0)}%` : "No score yet"}
           tone="blue"
         />
         <MetricCard
           icon={<Gauge size={32} />}
           label="Credit Risk Score"
-          value={`${score.credit_risk_score} / 1000`}
-          detail="Higher is better"
+          value={hasScore ? `${score.credit_risk_score} / 1000` : "-"}
+          detail={hasScore ? "Higher is better" : "No score yet"}
           tone="teal"
         />
         <MetricCard
           icon={<ShieldCheck size={32} />}
           label="Risk Category"
-          value={score.risk_category}
-          detail="Within policy thresholds"
+          value={hasScore ? score.risk_category : "-"}
+          detail={hasScore ? "Within policy thresholds" : "No score yet"}
           tone="amber"
         />
         <MetricCard
           icon={<Gavel size={32} />}
           label="Suggested Decision"
-          value={score.suggested_decision}
-          detail="Requires underwriter review"
+          value={hasScore ? score.suggested_decision : "-"}
+          detail={hasScore ? "Requires underwriter review" : "No score yet"}
           tone="purple"
         />
       </div>

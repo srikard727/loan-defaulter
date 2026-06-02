@@ -15,6 +15,7 @@ REVIEW_LOG_PATH = LOG_DIR / "review_notes.csv"
 
 PREDICTION_FIELDS = [
     "timestamp",
+    "account_id",
     "applicant_id",
     "default_probability",
     "credit_risk_score",
@@ -28,11 +29,12 @@ PREDICTION_FIELDS = [
     "explanation",
 ]
 
-REVIEW_FIELDS = ["timestamp", "applicant_id", "status", "assigned_to", "note"]
+REVIEW_FIELDS = ["timestamp", "account_id", "applicant_id", "status", "assigned_to", "note"]
 
 
 def _append_csv(path: Path, fields: list[str], row: dict[str, Any]) -> None:
     LOG_DIR.mkdir(parents=True, exist_ok=True)
+    _migrate_csv_schema(path, fields)
     write_header = not path.exists()
     with path.open("a", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
@@ -41,9 +43,34 @@ def _append_csv(path: Path, fields: list[str], row: dict[str, Any]) -> None:
         writer.writerow({field: row.get(field, "") for field in fields})
 
 
-def record_prediction(response: ScoreResponse) -> None:
+def _migrate_csv_schema(path: Path, fields: list[str]) -> None:
+    if not path.exists():
+        return
+
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.reader(handle)
+        try:
+            current_fields = next(reader)
+        except StopIteration:
+            return
+
+    if current_fields == fields:
+        return
+
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for existing_row in rows:
+            writer.writerow({field: existing_row.get(field, "") for field in fields})
+
+
+def record_prediction(response: ScoreResponse, account_id: str) -> None:
     row = {
         "timestamp": response.created_at.isoformat(),
+        "account_id": account_id,
         "applicant_id": response.applicant_id,
         "default_probability": response.default_probability,
         "credit_risk_score": response.credit_risk_score,
@@ -59,9 +86,10 @@ def record_prediction(response: ScoreResponse) -> None:
     _append_csv(API_LOG_PATH, PREDICTION_FIELDS, row)
 
 
-def record_review(applicant_id: str, payload: ReviewNotePayload) -> dict[str, Any]:
+def record_review(applicant_id: str, payload: ReviewNotePayload, account_id: str) -> dict[str, Any]:
     row = {
         "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "account_id": account_id,
         "applicant_id": applicant_id,
         "status": payload.status,
         "assigned_to": payload.assigned_to,
@@ -71,18 +99,21 @@ def record_review(applicant_id: str, payload: ReviewNotePayload) -> dict[str, An
     return row
 
 
-def load_predictions(limit: int = 50) -> list[dict[str, Any]]:
+def load_predictions(limit: int = 50, account_id: str | None = None) -> list[dict[str, Any]]:
     if not API_LOG_PATH.exists():
-        return seed_predictions()[:limit]
+        return [] if account_id else seed_predictions()[:limit]
 
     with API_LOG_PATH.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
 
+    if account_id:
+        rows = [row for row in rows if row.get("account_id") == account_id]
+
     return list(reversed(rows))[:limit]
 
 
-def load_review_queue(limit: int = 25) -> list[dict[str, Any]]:
-    rows = load_predictions(limit=200)
+def load_review_queue(limit: int = 25, account_id: str | None = None) -> list[dict[str, Any]]:
+    rows = load_predictions(limit=200, account_id=account_id)
     queue = [
         {
             "applicant_id": row.get("applicant_id", "A1001"),
@@ -97,7 +128,7 @@ def load_review_queue(limit: int = 25) -> list[dict[str, Any]]:
         for row in rows
         if "Review" in row.get("decision", "") or "High Risk" in row.get("risk_category", "")
     ]
-    return queue[:limit] or seed_review_queue()
+    return queue[:limit] or ([] if account_id else seed_review_queue())
 
 
 def seed_predictions() -> list[dict[str, Any]]:

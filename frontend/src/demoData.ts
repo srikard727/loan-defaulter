@@ -77,11 +77,38 @@ export const demoScore: ScoreResponse = {
   created_at: "2024-05-20T10:12:00"
 };
 
+export const emptyScore: ScoreResponse = {
+  applicant_id: "",
+  default_probability: 0,
+  credit_risk_score: 0,
+  risk_category: "",
+  decision: "",
+  suggested_decision: "",
+  status: "",
+  model_confidence: 0,
+  model_version: "",
+  threshold: 0,
+  latency_ms: 0,
+  fraud_score: 0,
+  collection_priority: "",
+  recommended_credit_limit: 0,
+  top_risk_factors: [],
+  rule_results: [],
+  fraud_flags: [],
+  data_sources: [],
+  lifecycle_signals: [],
+  adverse_action_reasons: [],
+  explanation: "",
+  created_at: ""
+};
+
 export const demoPortfolio: PortfolioBucket[] = [
   { name: "Low Risk", value: 36, probability_range: "< 0.20" },
   { name: "Medium Risk", value: 44, probability_range: "0.20 - 0.50" },
   { name: "High Risk", value: 20, probability_range: ">= 0.50" }
 ];
+
+export const emptyPortfolio: PortfolioBucket[] = [];
 
 export const demoMonitoring: MonitoringSummary = {
   drift_status: "Stable",
@@ -114,6 +141,23 @@ export const demoMonitoring: MonitoringSummary = {
       { label: "W3", value: 0.09 },
       { label: "W4", value: 0.07 }
     ]
+  }
+};
+
+export const emptyMonitoring: MonitoringSummary = {
+  drift_status: "No data",
+  drift_psi: 0,
+  p95_latency_ms: 0,
+  requests_24h: 0,
+  model_version: "",
+  deployed_at: "",
+  approval_rate: 0,
+  manual_review_rate: 0,
+  high_risk_rate: 0,
+  series: {
+    latency: [],
+    requests: [],
+    drift: []
   }
 };
 
@@ -164,7 +208,7 @@ export const demoAuditLogs: AuditLog[] = [
 
 export const demoPlatformFeatures: PlatformFeatures = {
   modules: [
-    { module: "Customer Intake Module", capability: "Borrower form, validation, applicant ID tracking", status: "live", detail: "React intake workflow posts a typed payload to FastAPI." },
+    { module: "Customer Intake Module", capability: "Account-scoped loaner creation, borrower form, validation", status: "live", detail: "React intake workflow saves loaner profiles per account and posts typed payloads to FastAPI." },
     { module: "Data Aggregation Module", capability: "Credit bureau, bank statement, KYC, alternative data adapters", status: "simulated", detail: "External providers are represented with MVP status signals." },
     { module: "Feature Engineering Engine", capability: "Financial ratios, stability ratios, derived model fields", status: "live", detail: "Existing XGBoost preprocessing generates engineered features before inference." },
     { module: "Risk Scoring Engine", capability: "Default probability, 0-1000 score, risk category", status: "live", detail: "Feature-engineered XGBoost model serves real-time predictions." },
@@ -173,7 +217,7 @@ export const demoPlatformFeatures: PlatformFeatures = {
     { module: "Explainability Module", capability: "Feature impact and adverse action reasons", status: "live", detail: "Feature importance and policy reasons are returned with each score." },
     { module: "Monitoring & MLOps", capability: "Versioning, drift, metrics, Grafana scaffold", status: "ready", detail: "Metrics endpoints are live; model registry is future hardening." },
     { module: "Reporting Dashboard", capability: "Executive, data science, operations views", status: "live", detail: "React pages cover scoring, monitoring, reviews, API scoring, and audit logs." },
-    { module: "Compliance & Audit Layer", capability: "Audit logs, review, reasons, RBAC controls", status: "ready", detail: "Audit events are local; production auth and encryption are represented as controls." }
+    { module: "Compliance & Audit Layer", capability: "Account login, audit logs, review, reasons", status: "live", detail: "Signed-in accounts have isolated loaners and applicant logs; production role policies can attach next." }
   ],
   data_integrations: [
     { label: "Credit bureau", value: "Adapter ready", status: "ready", detail: "Use submitted credit score in MVP; connect CIBIL/Experian/Equifax/CRIF in production." },
@@ -208,10 +252,12 @@ export const demoPlatformFeatures: PlatformFeatures = {
     { label: "A/B testing", value: "Planned", status: "planned", detail: "Can compare model versions once registry is connected." }
   ],
   compliance: [
-    { label: "Audit logs", value: "Live", status: "live", detail: "Every API score is written to a local audit CSV." },
+    { label: "Account login", value: "Live", status: "live", detail: "Users sign in with local account credentials before scoring." },
+    { label: "Tenant isolation", value: "Live", status: "live", detail: "Loaner profiles, scoring, and audit views are filtered by signed-in account." },
+    { label: "Audit logs", value: "Live", status: "live", detail: "Every API score is written to an account-scoped local audit CSV." },
     { label: "Explainable decisions", value: "Live", status: "live", detail: "Decision rules and adverse action reasons are returned." },
     { label: "Consent controls", value: "Ready", status: "ready", detail: "UI controls represent required consent gates." },
-    { label: "RBAC and encryption", value: "Ready", status: "ready", detail: "Modeled as controls; production auth and encryption remain future hardening." }
+    { label: "RBAC and encryption", value: "Ready", status: "ready", detail: "Authentication is live; production role policies and encryption remain hardening." }
   ],
   analytics: [
     { label: "Executive dashboard", value: "Live", status: "live", detail: "Portfolio risk, approval rate, and volume indicators are visible." },

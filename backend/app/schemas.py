@@ -24,6 +24,10 @@ class ApplicantPayload(BaseModel):
     HasCoSigner: str = "No"
 
 
+class LoanerCreatePayload(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+
+
 class RiskFactor(BaseModel):
     feature: str
     impact: float
@@ -84,6 +88,30 @@ class ReviewNotePayload(BaseModel):
     status: str = "Pending Review"
     assigned_to: str = "John Smith"
     note: str = ""
+
+
+class RegisterPayload(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    email: str = Field(min_length=5, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+    workspace: str = Field(default="Acme Underwriting", min_length=2, max_length=80)
+
+
+class LoginPayload(BaseModel):
+    email: str = Field(min_length=5, max_length=120)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class AuthUser(BaseModel):
+    account_id: str
+    name: str
+    email: str
+    workspace: str
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: AuthUser
 
 
 class ReviewItem(BaseModel):

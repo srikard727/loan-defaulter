@@ -20,17 +20,21 @@ export function SignalListPanel({ title, subtitle, icon, items, className = "" }
         </span>
       </div>
 
-      <div className="signal-list">
-        {items.map((item) => (
-          <article className="signal-row" key={`${title}-${item.label}`}>
-            <div>
-              <strong>{item.label}</strong>
-              <small>{item.detail}</small>
-            </div>
-            <span className={`signal-badge ${item.status}`}>{item.value}</span>
-          </article>
-        ))}
-      </div>
+      {items.length ? (
+        <div className="signal-list">
+          {items.map((item) => (
+            <article className="signal-row" key={`${title}-${item.label}`}>
+              <div>
+                <strong>{item.label}</strong>
+                <small>{item.detail}</small>
+              </div>
+              <span className={`signal-badge ${item.status}`}>{item.value}</span>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="chart-empty compact-empty">No score yet</div>
+      )}
     </section>
   );
 }

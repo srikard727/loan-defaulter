@@ -17,10 +17,20 @@ export function ApiScoringPanel() {
         </button>
       </div>
 
-      <pre className="code-card">{`POST /score
+      <pre className="code-card">{`POST /auth/login
 
 Headers:
-Authorization: Bearer {api_key}
+Content-Type: application/json
+
+Request Body (JSON):
+{ "email": "user@example.com", "password": "..." }
+
+Returns: bearer token and account profile
+
+POST /score
+
+Headers:
+Authorization: Bearer {token}
 Content-Type: application/json
 
 Request Body (JSON):

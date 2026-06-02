@@ -8,9 +8,9 @@ def platform_features() -> dict[str, object]:
         "modules": [
             PlatformModule(
                 module="Customer Intake Module",
-                capability="Borrower form, validation, applicant ID tracking",
+                capability="Account-scoped loaner creation, borrower form, validation",
                 status="live",
-                detail="React intake workflow posts a typed payload to FastAPI.",
+                detail="React intake workflow saves loaner profiles per account and posts typed payloads to FastAPI.",
             ),
             PlatformModule(
                 module="Data Aggregation Module",
@@ -62,9 +62,9 @@ def platform_features() -> dict[str, object]:
             ),
             PlatformModule(
                 module="Compliance & Audit Layer",
-                capability="Audit logs, human review, adverse action reasons, RBAC controls",
-                status="ready",
-                detail="Audit events are recorded locally; production RBAC/encryption are represented as controls.",
+                capability="Account login, audit logs, human review, adverse action reasons",
+                status="live",
+                detail="Signed-in accounts have isolated loaners and applicant logs; production RBAC/encryption remain hardening steps.",
             ),
         ],
         "data_integrations": [
@@ -138,11 +138,13 @@ def platform_features() -> dict[str, object]:
             SignalItem(label="A/B testing", value="Planned", status="planned", detail="Can compare model versions once registry is connected."),
         ],
         "compliance": [
-            SignalItem(label="Audit logs", value="Live", status="live", detail="Every API score is written to a local audit CSV."),
+            SignalItem(label="Account login", value="Live", status="live", detail="Users sign in with local account credentials before scoring."),
+            SignalItem(label="Tenant isolation", value="Live", status="live", detail="Loaner profiles, scoring, and audit views are filtered by signed-in account."),
+            SignalItem(label="Audit logs", value="Live", status="live", detail="Every API score is written to an account-scoped local audit CSV."),
             SignalItem(label="Explainable decisions", value="Live", status="live", detail="Decision rules and adverse action reasons are returned."),
             SignalItem(label="Consent-based data collection", value="Ready", status="ready", detail="UI controls represent required consent gates."),
             SignalItem(label="PII encryption", value="Planned", status="planned", detail="Production database encryption and secrets management are required."),
-            SignalItem(label="Role-based access control", value="Ready", status="ready", detail="Role matrix is modeled; auth provider integration is future work."),
+            SignalItem(label="Role-based access control", value="Ready", status="ready", detail="Authentication is live; production role policies can attach to the account model."),
         ],
         "analytics": [
             SignalItem(label="Executive dashboard", value="Live", status="live", detail="Portfolio risk, approval rate, and volume indicators are visible."),

@@ -19,18 +19,24 @@ export function DecisionEngine({ rules }: DecisionEngineProps) {
         <Info size={17} />
       </div>
 
-      <div className="rules-list">
-        {rules.map((rule) => (
-          <div className="rule-row" key={`${rule.label}-${rule.condition}`}>
-            <span className={`rule-code ${rule.status}`}>{"</>"}</span>
-            <span>{rule.condition}</span>
-            <span className="rule-arrow">{"->"}</span>
-            <strong className={rule.status}>{rule.outcome}</strong>
+      {rules.length ? (
+        <>
+          <div className="rules-list">
+            {rules.map((rule) => (
+              <div className="rule-row" key={`${rule.label}-${rule.condition}`}>
+                <span className={`rule-code ${rule.status}`}>{"</>"}</span>
+                <span>{rule.condition}</span>
+                <span className="rule-arrow">{"->"}</span>
+                <strong className={rule.status}>{rule.outcome}</strong>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <p className="muted-block">Rules evaluated in order. Model probability is used for the final risk band.</p>
+          <p className="muted-block">Rules evaluated in order. Model probability is used for the final risk band.</p>
+        </>
+      ) : (
+        <div className="chart-empty">No score yet</div>
+      )}
     </section>
   );
 }

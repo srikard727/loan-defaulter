@@ -20,18 +20,24 @@ export function RiskFactorsChart({ factors }: RiskFactorsChartProps) {
         <Info size={17} />
       </div>
 
-      <div className="horizontal-chart">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={factors} layout="vertical" margin={{ top: 8, right: 28, left: 8, bottom: 8 }}>
-            <CartesianGrid horizontal={false} stroke="#e5e7eb" />
-            <XAxis type="number" domain={[0, "dataMax"]} tick={{ fontSize: 12 }} />
-            <YAxis dataKey="feature" type="category" width={132} tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(value) => Number(value).toFixed(3)} />
-            <Bar dataKey="impact" fill="#1d72d8" radius={[0, 4, 4, 0]} barSize={16} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      <p className="axis-label">Impact contribution to risk</p>
+      {factors.length ? (
+        <>
+          <div className="horizontal-chart">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={factors} layout="vertical" margin={{ top: 8, right: 28, left: 8, bottom: 8 }}>
+                <CartesianGrid horizontal={false} stroke="#e5e7eb" />
+                <XAxis type="number" domain={[0, "dataMax"]} tick={{ fontSize: 12 }} />
+                <YAxis dataKey="feature" type="category" width={132} tick={{ fontSize: 12 }} />
+                <Tooltip formatter={(value) => Number(value).toFixed(3)} />
+                <Bar dataKey="impact" fill="#1d72d8" radius={[0, 4, 4, 0]} barSize={16} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="axis-label">Impact contribution to risk</p>
+        </>
+      ) : (
+        <div className="chart-empty">No score yet</div>
+      )}
     </section>
   );
 }

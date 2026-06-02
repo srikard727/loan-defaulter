@@ -44,11 +44,11 @@ export function Settings({ platformFeatures }: SettingsProps) {
           <dl className="settings-list">
             <div>
               <dt>Applicant Storage</dt>
-              <dd>PostgreSQL ready</dd>
+              <dd>Account-scoped loaner profiles</dd>
             </div>
             <div>
               <dt>Audit Trail</dt>
-              <dd>CSV local log</dd>
+              <dd>CSV with account isolation</dd>
             </div>
             <div>
               <dt>Monitoring</dt>
@@ -67,8 +67,9 @@ export function Settings({ platformFeatures }: SettingsProps) {
           <div className="toggle-list">
             <Toggle label="Underwriter review required for medium risk" checked />
             <Toggle label="Adverse action reason capture" checked />
+            <Toggle label="Account login required for scoring" checked />
+            <Toggle label="Applicant records isolated by account" checked />
             <Toggle label="PII encryption at rest" />
-            <Toggle label="Role-based access control" />
           </div>
         </section>
         <section className="panel">
@@ -80,7 +81,7 @@ export function Settings({ platformFeatures }: SettingsProps) {
             </span>
           </div>
           <div className="api-key-box">
-            <code>fc_live_sk_************0931</code>
+            <code>Bearer token issued at sign-in</code>
             <span className="status-badge">Active</span>
           </div>
         </section>

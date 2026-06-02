@@ -18,6 +18,32 @@ export type ApplicantPayload = {
   HasCoSigner: "Yes" | "No";
 };
 
+export type AuthUser = {
+  account_id: string;
+  name: string;
+  email: string;
+  workspace: string;
+};
+
+export type AuthResponse = {
+  token: string;
+  user: AuthUser;
+};
+
+export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type RegisterPayload = LoginPayload & {
+  name: string;
+  workspace: string;
+};
+
+export type LoanerCreatePayload = {
+  name: string;
+};
+
 export type RiskFactor = {
   feature: string;
   impact: number;
@@ -110,6 +136,7 @@ export type MonitoringSummary = {
 
 export type AuditLog = {
   timestamp: string;
+  account_id?: string;
   applicant_id: string;
   default_probability: string;
   credit_risk_score: string;

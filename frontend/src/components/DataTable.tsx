@@ -15,13 +15,21 @@ export function DataTable({ columns, rows }: DataTableProps) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
-            <tr key={`${row.applicant_id ?? "row"}-${index}`}>
-              {columns.map((column) => (
-                <td key={column.key}>{String(row[column.key] ?? "")}</td>
-              ))}
+          {rows.length ? (
+            rows.map((row, index) => (
+              <tr key={`${row.applicant_id ?? "row"}-${index}`}>
+                {columns.map((column) => (
+                  <td key={column.key}>{String(row[column.key] ?? "")}</td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td className="empty-cell" colSpan={columns.length}>
+                No account-specific applicants yet.
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

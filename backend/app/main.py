@@ -1,15 +1,20 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
 from backend.app.schemas import (
     ApplicantPayload,
+    AuthResponse,
+    AuthUser,
+    LoanerCreatePayload,
+    LoginPayload,
     ModelInfo,
     MonitoringSummary,
     PlatformFeatures,
     PortfolioBucket,
+    RegisterPayload,
     ReviewNotePayload,
     ScoreResponse,
 )
@@ -19,6 +24,8 @@ from backend.app.services.audit_service import (
     record_prediction,
     record_review,
 )
+from backend.app.services.auth_service import authenticate_account, get_current_user, register_account
+from backend.app.services.loaner_service import create_loaner, list_loaners, save_loaner
 from backend.app.services.monitoring_service import monitoring_summary, portfolio_distribution
 from backend.app.services.platform_service import platform_features
 from backend.app.services.scoring_service import model_info, score_application
@@ -49,41 +56,76 @@ def health() -> dict[str, str]:
     return {"status": "ok", "service": "loan-default-api"}
 
 
+@app.post("/auth/register", response_model=AuthResponse)
+def register(payload: RegisterPayload) -> AuthResponse:
+    return register_account(payload)
+
+
+@app.post("/auth/login", response_model=AuthResponse)
+def login(payload: LoginPayload) -> AuthResponse:
+    return authenticate_account(payload)
+
+
+@app.get("/auth/me", response_model=AuthUser)
+def me(current_user: AuthUser = Depends(get_current_user)) -> AuthUser:
+    return current_user
+
+
+@app.get("/loaners", response_model=list[ApplicantPayload])
+def loaners(current_user: AuthUser = Depends(get_current_user)) -> list[ApplicantPayload]:
+    return list_loaners(current_user.account_id)
+
+
+@app.post("/loaners", response_model=ApplicantPayload)
+def add_loaner(payload: LoanerCreatePayload, current_user: AuthUser = Depends(get_current_user)) -> ApplicantPayload:
+    return create_loaner(current_user.account_id, payload)
+
+
+@app.put("/loaners", response_model=ApplicantPayload)
+def update_loaner(payload: ApplicantPayload, current_user: AuthUser = Depends(get_current_user)) -> ApplicantPayload:
+    return save_loaner(current_user.account_id, payload)
+
+
 @app.post("/score", response_model=ScoreResponse)
-def score(payload: ApplicantPayload) -> ScoreResponse:
+def score(payload: ApplicantPayload, current_user: AuthUser = Depends(get_current_user)) -> ScoreResponse:
+    save_loaner(current_user.account_id, payload)
     response = score_application(payload)
-    record_prediction(response)
+    record_prediction(response, account_id=current_user.account_id)
     return response
 
 
 @app.get("/applications")
-def applications(limit: int = 50) -> list[dict[str, object]]:
-    return load_predictions(limit=limit)
+def applications(limit: int = 50, current_user: AuthUser = Depends(get_current_user)) -> list[dict[str, object]]:
+    return load_predictions(limit=limit, account_id=current_user.account_id)
 
 
 @app.get("/audit-logs")
-def audit_logs(limit: int = 100) -> list[dict[str, object]]:
-    return load_predictions(limit=limit)
+def audit_logs(limit: int = 100, current_user: AuthUser = Depends(get_current_user)) -> list[dict[str, object]]:
+    return load_predictions(limit=limit, account_id=current_user.account_id)
 
 
 @app.get("/reviews")
-def reviews(limit: int = 25) -> list[dict[str, object]]:
-    return load_review_queue(limit=limit)
+def reviews(limit: int = 25, current_user: AuthUser = Depends(get_current_user)) -> list[dict[str, object]]:
+    return load_review_queue(limit=limit, account_id=current_user.account_id)
 
 
 @app.post("/reviews/{applicant_id}")
-def review_note(applicant_id: str, payload: ReviewNotePayload) -> dict[str, object]:
-    return record_review(applicant_id, payload)
+def review_note(
+    applicant_id: str,
+    payload: ReviewNotePayload,
+    current_user: AuthUser = Depends(get_current_user),
+) -> dict[str, object]:
+    return record_review(applicant_id, payload, account_id=current_user.account_id)
 
 
 @app.get("/monitoring/summary", response_model=MonitoringSummary)
-def monitoring() -> dict[str, object]:
-    return monitoring_summary()
+def monitoring(current_user: AuthUser = Depends(get_current_user)) -> dict[str, object]:
+    return monitoring_summary(account_id=current_user.account_id)
 
 
 @app.get("/portfolio-risk", response_model=list[PortfolioBucket])
-def portfolio_risk() -> list[dict[str, object]]:
-    return portfolio_distribution()
+def portfolio_risk(current_user: AuthUser = Depends(get_current_user)) -> list[dict[str, object]]:
+    return portfolio_distribution(account_id=current_user.account_id)
 
 
 @app.get("/model-info", response_model=ModelInfo)

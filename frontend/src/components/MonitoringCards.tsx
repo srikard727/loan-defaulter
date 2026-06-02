@@ -36,8 +36,8 @@ export function MonitoringCards({ summary }: MonitoringCardsProps) {
         </article>
         <article className="mini-card version-card">
           <span className="mini-label">Model Version</span>
-          <strong className="blue-text">{summary.model_version}</strong>
-          <small>Deployed: {summary.deployed_at}</small>
+          <strong className="blue-text">{summary.model_version || "-"}</strong>
+          <small>Deployed: {summary.deployed_at || "-"}</small>
           <span className="status-badge">
             <Server size={13} />
             Live
@@ -55,6 +55,10 @@ export function MonitoringCards({ summary }: MonitoringCardsProps) {
 }
 
 function SparkArea({ data, color }: { data: Array<{ label: string; value: number }>; color: string }) {
+  if (!data.length) {
+    return <div className="sparkline spark-empty">No entries</div>;
+  }
+
   return (
     <div className="sparkline">
       <ResponsiveContainer width="100%" height="100%">
@@ -68,6 +72,10 @@ function SparkArea({ data, color }: { data: Array<{ label: string; value: number
 }
 
 function SparkBars({ data }: { data: Array<{ label: string; value: number }> }) {
+  if (!data.length) {
+    return <div className="sparkline spark-empty">No entries</div>;
+  }
+
   return (
     <div className="sparkline">
       <ResponsiveContainer width="100%" height="100%">

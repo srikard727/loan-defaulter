@@ -3,18 +3,19 @@ import {
   ChevronsUpDown,
   Code2,
   FileClock,
-  Gauge,
   LayoutDashboard,
   LogOut,
   Settings,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  UserPlus
 } from "lucide-react";
 import type { ComponentType } from "react";
+import type { AuthUser } from "../types";
 
 export type PageKey =
   | "Dashboard"
-  | "Score Loan"
+  | "Add New Loaner"
   | "Underwriter Review"
   | "API Scoring"
   | "Monitoring"
@@ -23,13 +24,14 @@ export type PageKey =
 
 type SidebarProps = {
   activePage: PageKey;
+  user: AuthUser;
   onPageChange: (page: PageKey) => void;
   onLogout: () => void;
 };
 
 const navigation: Array<{ label: PageKey; icon: ComponentType<{ size?: number }> }> = [
   { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Score Loan", icon: Gauge },
+  { label: "Add New Loaner", icon: UserPlus },
   { label: "Underwriter Review", icon: UserCheck },
   { label: "API Scoring", icon: Code2 },
   { label: "Monitoring", icon: Activity },
@@ -37,7 +39,7 @@ const navigation: Array<{ label: PageKey; icon: ComponentType<{ size?: number }>
   { label: "Settings", icon: Settings }
 ];
 
-export function Sidebar({ activePage, onPageChange, onLogout }: SidebarProps) {
+export function Sidebar({ activePage, user, onPageChange, onLogout }: SidebarProps) {
   return (
     <aside className="sidebar">
       <button className="brand" type="button" onClick={() => onPageChange("Dashboard")} aria-label="FinCred AI home">
@@ -68,9 +70,9 @@ export function Sidebar({ activePage, onPageChange, onLogout }: SidebarProps) {
       <div className="sidebar-spacer" />
 
       <button className="tenant-switcher" type="button" title="Switch workspace">
-        <span className="avatar">AU</span>
+        <span className="avatar">{initials(user)}</span>
         <span>
-          <strong>Acme Underwriting</strong>
+          <strong>{user.workspace}</strong>
           <small>Production <span className="live-dot" /></small>
         </span>
         <ChevronsUpDown size={16} />
@@ -82,4 +84,16 @@ export function Sidebar({ activePage, onPageChange, onLogout }: SidebarProps) {
       </button>
     </aside>
   );
+}
+
+function initials(user: AuthUser): string {
+  const parts = user.name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) {
+    return user.email.slice(0, 2).toUpperCase();
+  }
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 }
