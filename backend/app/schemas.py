@@ -1,20 +1,20 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ApplicantPayload(BaseModel):
     applicant_id: str = Field(default="A1001", min_length=1)
     Age: int = Field(default=34, ge=18, le=100)
-    Income: float = Field(default=85000, gt=0)
-    LoanAmount: float = Field(default=25000, gt=0)
+    Income: float = Field(default=85000, gt=0, allow_inf_nan=False)
+    LoanAmount: float = Field(default=25000, gt=0, allow_inf_nan=False)
     CreditScore: int = Field(default=720, ge=300, le=850)
     MonthsEmployed: int = Field(default=48, ge=0, le=720)
     NumCreditLines: int = Field(default=3, ge=1, le=30)
-    InterestRate: float = Field(default=12.5, ge=0, le=50)
+    InterestRate: float = Field(default=12.5, ge=0, le=50, allow_inf_nan=False)
     LoanTerm: int = Field(default=36, ge=1, le=360)
-    DTIRatio: float = Field(default=0.38, ge=0, le=1)
+    DTIRatio: float = Field(default=0.38, ge=0, le=1, allow_inf_nan=False)
     Education: str = "Bachelor's"
     EmploymentType: str = "Full-time"
     MaritalStatus: str = "Married"
@@ -22,6 +22,13 @@ class ApplicantPayload(BaseModel):
     HasDependents: str = "No"
     LoanPurpose: str = "Auto"
     HasCoSigner: str = "No"
+
+    @field_validator("applicant_id")
+    @classmethod
+    def reject_blank_applicant_id(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("applicant_id must not be blank")
+        return value
 
 
 class LoanerCreatePayload(BaseModel):
